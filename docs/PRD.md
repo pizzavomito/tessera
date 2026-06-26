@@ -168,7 +168,14 @@ const THEME = {
   id: "poc",
   name: "Placeholder",
 
-  grid: { cols: 5, rows: 7 },
+  grid: {
+    cols: 5, rows: 7,
+    // optionnel : illustration de fond dans laquelle la grille s'incruste.
+    // bg: "assets/img/themes/<id>/cadre.jpg",
+    // bgWindow: { x: 96, y: 210, w: 460, h: 640 },  // zone de jeu, en pixels de l'image
+    // emptyStyle: "transparent",                    // "opaque" (défaut) | "translucent" | "transparent"
+    // lineColor: "rgba(216,179,94,.55)",             // contour des cases (sinon aucun, comme avant)
+  },
 
   // motifs = teintes (placeholder). Futur : ajouter img:"data:..." (ou url) par motif.
   motifs: [
@@ -274,8 +281,8 @@ Ces choix comblent des zones non spécifiées ; tous ajustables (la plupart via 
 ## 15. Roadmap / prochaines étapes
 
 ### 15.1 Brancher les vrais assets (points d'entrée déjà prévus)
-- `THEME.motifs[].img` (data-URL ou chemin) → afficher l'image dans la case au lieu de la couleur.
-- `THEME.grid.bg` → image de fond de grille (à ajouter au rendu).
+- `THEME.motifs[].img` (chemin relatif) → **fait** : `motifCSS(id)` (`js/theme.js`) renvoie l'image en couverture avec la couleur en repli (fichier absent/introuvable), utilisé partout où un motif est dessiné (grille, atelier, éditeur, palette, ressources, accueil). Reste à fournir les vrais fichiers et les lister dans `SHELL` (`sw.js`).
+- `THEME.grid.bg` + `THEME.grid.bgWindow` → **fait** : `buildGrid()` (`js/grid.js`) charge l'illustration dans `.board-frame`, cale le cadre sur son ratio réel, puis positionne `.grid` (classe `embedded`, chrome propre neutralisé) en `%` sur la fenêtre de jeu `bgWindow = {x,y,w,h}` (pixels de l'image source). Sans `bg`, rendu inchangé. `THEME.grid.emptyStyle` (`opaque` défaut · `translucent` · `transparent`) règle l'apparence des cases vides par-dessus le fond. `THEME.grid.lineColor` (couleur CSS, optionnelle) dessine un contour de case — nécessaire pour garder la structure de la grille visible quand `emptyStyle` rend les cases transparentes. Reste à fournir une vraie illustration de thème.
 - `THEME.story[i].unlock.img` → illustration de chapitre (remplacer le placeholder `.art`).
 
 ### 15.2 Éditeur d'atelier (theme editor)

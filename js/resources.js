@@ -1,7 +1,7 @@
 // resources.js — rendu de la barre de ressources et activation des actions.
 
 import { S, $, totalEclats } from './state.js';
-import { THEME, MOTIF } from './theme.js';
+import { THEME, MOTIF, motifCSS } from './theme.js';
 
 export function renderRes() {
   renderEclatCubes();
@@ -24,7 +24,7 @@ export function renderEclatCubes() {
   list.slice(0, cap).forEach(m => {
     const d = document.createElement('div');
     d.className = 'cube on';
-    d.style.background = MOTIF(m).color;
+    d.style.background = motifCSS(m);
     d.style.borderColor = MOTIF(m).color;
     box.appendChild(d);
   });

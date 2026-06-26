@@ -3,7 +3,7 @@
 // modify : forme verrouillée (recoloration). create : forme libre + 1 essence.
 
 import { S, $, setStatus } from './state.js';
-import { THEME, MOTIF, NM } from './theme.js';
+import { THEME, MOTIF, NM, motifCSS } from './theme.js';
 import { oriented } from './tesselle.js';
 import { renderAtelier } from './atelier.js';
 import { renderRes } from './resources.js';
@@ -57,7 +57,7 @@ function renderEditor() {
     else {
       if (editorState.locked) b.classList.add('lock');
       const v = editorState.cells[r][c];
-      if (v != null) b.style.background = MOTIF(v).color;
+      if (v != null) b.style.background = motifCSS(v);
       b.addEventListener('click', () => paintEditorCell(r, c));
     }
     ed.appendChild(b);
@@ -65,7 +65,7 @@ function renderEditor() {
 
   const pk = $('picker'); pk.innerHTML = '';
   THEME.motifs.forEach(m => {
-    const b = document.createElement('button'); b.className = 'pk'; b.style.background = m.color;
+    const b = document.createElement('button'); b.className = 'pk'; b.style.background = motifCSS(m.id);
     b.setAttribute('aria-pressed', String(m.id === editorState.color));
     b.disabled = S.eclats[m.id] === 0;
     b.innerHTML = `<b>${availOf(m.id)}</b>`;

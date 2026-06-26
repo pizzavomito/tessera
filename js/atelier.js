@@ -1,7 +1,7 @@
 // atelier.js — emplacements de tesselles, glisser-déposer, boutons d'action.
 
 import { S, $, setStatus } from './state.js';
-import { MOTIF } from './theme.js';
+import { motifCSS } from './theme.js';
 import { oriented, fits, newPiece } from './tesselle.js';
 import { cellEl, paintCell, pop, paintGhost, clearGhost } from './grid.js';
 import { renderRes, updateActions } from './resources.js';
@@ -33,7 +33,7 @@ function miniOf(p, px) {
   const map = {}; o.cells.forEach(([r, c], k) => map[r + '_' + c] = o.motifs[k]);
   for (let r = 0; r < maxR; r++) for (let c = 0; c < maxC; c++) {
     const i = document.createElement('i'); const m = map[r + '_' + c];
-    i.style.background = m == null ? 'transparent' : MOTIF(m).color;
+    i.style.background = m == null ? 'transparent' : motifCSS(m);
     g.appendChild(i);
   }
   return g;
@@ -116,7 +116,7 @@ function buildPreview() {
   for (let r = 0; r < maxR; r++) for (let c = 0; c < maxC; c++) {
     const i = document.createElement('i');
     if (map[r + '_' + c] == null) { i.style.background = 'transparent'; }
-    else { i.style.background = MOTIF(map[r + '_' + c]).color; i.style.width = px + 'px'; i.style.height = px + 'px'; }
+    else { i.style.background = motifCSS(map[r + '_' + c]); i.style.width = px + 'px'; i.style.height = px + 'px'; }
     wrap.appendChild(i);
   }
   drag.px = px; document.body.appendChild(wrap);

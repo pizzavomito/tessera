@@ -51,7 +51,14 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 .board-wrap{flex:1 1 auto;min-height:0;display:flex;align-items:center;justify-content:center}
 .grid{height:100%;max-width:100%;display:grid;gap:4px;background:var(--surface);padding:4px;
   border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);touch-action:none}
+
+/* Grille incrustée dans une illustration de fond (THEME.grid.bg) */
+.board-frame{position:relative;height:100%;max-width:100%}
+.board-bg{position:absolute;inset:0;width:100%;height:100%;display:block}
+.grid.embedded{position:absolute;height:auto;max-width:none;gap:2px;
+  background:transparent;border:none;border-radius:0;box-shadow:none;padding:0}
 .cell{position:relative;border-radius:6px;background:var(--line-soft);
+  border:1px solid var(--cell-line,transparent);
   display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.5);
   user-select:none;transition:transform .08s, box-shadow .12s}
 .cell.filled{box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)}

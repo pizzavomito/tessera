@@ -13,6 +13,13 @@ export const rnd = n => Math.floor(Math.random() * n);
 export const rndMotif = () => rnd(NM);
 export const MOTIF = id => MOTIFS[id];
 
+// Valeur CSS `background` d'un motif : image en couverture si `img` est fourni
+// (avec la couleur en repli si le fichier est introuvable), sinon couleur unie.
+export function motifCSS(id) {
+  const m = MOTIF(id);
+  return m.img ? `url("./${m.img}") center / cover no-repeat, ${m.color}` : m.color;
+}
+
 // Récupère le catalogue de thèmes (relatif au document → OK sous /repo/ sur Pages).
 export async function loadCatalog() {
   const res = await fetch('./data/index.json', { cache: 'no-cache' });

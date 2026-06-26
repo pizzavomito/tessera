@@ -5,6 +5,12 @@
       "name": "Placeholder",
       "file": "data/themes/poc.json",
       "storyFile": "data/stories/poc.json"
+    },
+    {
+      "id": "test",
+      "name": "Test",
+      "file": "data/themes/test.json",
+      "storyFile": "data/stories/test.json"
     }
   ]
 }

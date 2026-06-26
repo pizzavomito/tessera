@@ -1,7 +1,7 @@
 // home.js — écran d'accueil, sélection du thème/mode, démarrage.
 
 import { S, $, setStatus } from './state.js';
-import { THEME, COLS, ROWS, NM, MOTIFS, loadCatalog, loadTheme } from './theme.js';
+import { THEME, COLS, ROWS, NM, MOTIFS, loadCatalog, loadTheme, motifCSS } from './theme.js';
 import { buildGrid } from './grid.js';
 import { renderAtelier } from './atelier.js';
 import { renderRes } from './resources.js';
@@ -48,7 +48,7 @@ async function selectTheme(entry) {
     c.setAttribute('aria-pressed', String(c.dataset.id === entry.id)));
   // pastilles de couleurs du thème chargé
   const card = document.querySelector(`.theme-card[data-id="${entry.id}"] [data-sw]`);
-  if (card) card.innerHTML = MOTIFS.map(m => `<i style="background:${m.color}"></i>`).join('');
+  if (card) card.innerHTML = MOTIFS.map(m => `<i style="background:${motifCSS(m.id)}"></i>`).join('');
 }
 
 export function startGame(mode) {
@@ -77,7 +77,7 @@ export function startGame(mode) {
 function buildPalette() {
   const p = $('palette'); p.innerHTML = '';
   MOTIFS.forEach(m => {
-    const b = document.createElement('button'); b.className = 'pal'; b.style.background = m.color;
+    const b = document.createElement('button'); b.className = 'pal'; b.style.background = motifCSS(m.id);
     b.setAttribute('aria-pressed', String(m.id === S.palMotif));
     b.addEventListener('click', () => {
       S.palMotif = m.id;

@@ -1,0 +1,34 @@
+{
+  "id": "poc",
+  "name": "Récit de démonstration",
+  "chapters": [
+    {
+      "pattern": { "type": "rowMono" },
+      "unlock": {
+        "title": "I · La première ligne",
+        "text": "Une rangée d'une seule teinte traverse la mosaïque. Le mur se souvient de la lumière qui le frappait au matin."
+      }
+    },
+    {
+      "pattern": { "type": "block2" },
+      "unlock": {
+        "title": "II · Le carré",
+        "text": "Quatre tesselles identiques se rejoignent. Un fragment d'image affleure : une fenêtre, peut-être."
+      }
+    },
+    {
+      "pattern": { "type": "colMono" },
+      "unlock": {
+        "title": "III · La colonne",
+        "text": "Une colonne entière s'accorde. La paroi descend vers une porte que personne n'avait remarquée."
+      }
+    },
+    {
+      "pattern": { "type": "diag3" },
+      "unlock": {
+        "title": "IV · L'oblique",
+        "text": "Trois éclats d'une même couleur tracent une diagonale. La mosaïque pointe vers la suite."
+      }
+    }
+  ]
+}

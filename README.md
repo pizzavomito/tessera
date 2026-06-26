@@ -58,13 +58,17 @@ Tous les chemins sont **relatifs** (`./js/...`, `./data/...`, `start_url: "."`),
 ## Ajouter un thème
 
 1. Créer `data/themes/<id>.json` (copier `poc.json`). Champs : `grid`, `motifs`, `shapes`, `rules`.
-   - `motifs[]` : `{ id, name, color }` — placeholder. Pour de vraies images, ajouter `img` et l'utiliser dans `grid.js` (`paintCell`).
+   - `motifs[]` : `{ id, name, color, img? }` — `color` reste obligatoire (repli si `img` absent ou introuvable). `img` = chemin relatif (ex. `assets/img/motifs/ambre.png`). Pris en charge automatiquement partout via `motifCSS()` (`js/theme.js`) : grille, atelier, éditeur, palette, ressources, accueil — rien à modifier ailleurs.
+   - `grid.bg?` : chemin relatif vers une illustration de fond (ex. `assets/img/themes/foret/cadre.jpg`). Si défini, la grille s'incruste dans l'image au lieu d'être un panneau autonome.
+   - `grid.bgWindow?` : `{ x, y, w, h }` en **pixels de l'image source** — la zone où la grille doit se positionner (coordonnées lisibles directement dans l'outil de dessin). Sans `bgWindow`, la grille occupe toute l'image.
+   - `grid.emptyStyle?` : `"opaque"` (défaut, identique à aujourd'hui) · `"translucent"` · `"transparent"` — apparence des cases vides par-dessus le fond.
+   - `grid.lineColor?` : couleur CSS (ex. `"rgba(216,179,94,.55)"`) du contour de chaque case — utile pour rendre la grille visible quand `emptyStyle` est `transparent`/`translucent`. Sans elle, pas de contour (identique à aujourd'hui).
 2. (Optionnel) Créer une histoire `data/stories/<id>.json` (chapitres = `{ pattern, unlock }`).
 3. Référencer le thème dans `data/index.json` :
    ```json
    { "id": "<id>", "name": "Mon thème", "file": "data/themes/<id>.json", "storyFile": "data/stories/<id>.json" }
    ```
-4. Penser à ajouter les nouveaux fichiers à la liste `SHELL` de `sw.js` (et bumper `CACHE`).
+4. Penser à ajouter les nouveaux fichiers (dont les images `img`) à la liste `SHELL` de `sw.js` (et bumper `CACHE`).
 
 ## Ajouter un type de motif caché
 
