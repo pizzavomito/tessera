@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Tessera</title>
+<style>
+  :root{
+    --ink:#14161c; --surface:#1d2029; --surface-2:#252934;
+    --line:#333845; --line-soft:#2a2f3a;
+    --txt:#e6e8ee; --muted:#8b90a0;
+    --eclat:#e0b35e; --marteau:#7fa8c9; --essence:#a98fd6;
+    --ok:#5fa97f; --bad:#c8607a;
+    --radius:10px; --shadow:0 6px 22px rgba(0,0,0,.45);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{
+    background:radial-gradient(120% 90% at 50% -10%,#1b1f29 0%,var(--ink) 60%);
+    color:var(--txt); font-family:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
+    -webkit-tap-highlight-color:transparent; overscroll-behavior:none;
+    display:flex; justify-content:center;
+  }
+  .app{width:100%;max-width:460px;height:100dvh;display:flex;flex-direction:column;
+    padding:8px;gap:7px;overflow:hidden}
+  .mono{font-variant-numeric:tabular-nums}
+  h1,h2{margin:0;font-weight:650;letter-spacing:.02em}
+  button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
+  .hidden{display:none!important}
+
+  /* Accueil */
+  #home{flex:1;display:flex;flex-direction:column;justify-content:center;gap:24px;text-align:center}
+  .brand{font-size:clamp(40px,14vw,62px);font-weight:750;letter-spacing:.14em;
+    background:linear-gradient(180deg,#fff,var(--eclat));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .brand-sub{color:var(--muted);letter-spacing:.32em;font-size:12px;text-transform:uppercase;margin-top:-12px}
+  .card-label{color:var(--muted);font-size:12px;letter-spacing:.18em;text-transform:uppercase;margin-bottom:8px}
+  .themes{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+  .theme-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+    padding:14px 18px;display:flex;flex-direction:column;gap:10px;min-width:140px}
+  .theme-card[aria-pressed="true"]{border-color:var(--eclat);box-shadow:0 0 0 1px var(--eclat)}
+  .swatches{display:flex;gap:4px;justify-content:center}
+  .swatches i{width:14px;height:14px;border-radius:3px;display:block}
+  .modes{display:flex;gap:12px;justify-content:center}
+  .mode-btn{flex:1;max-width:190px;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+    padding:18px 14px;display:flex;flex-direction:column;gap:6px;transition:.15s}
+  .mode-btn:active{transform:scale(.98)}
+  .mode-btn:hover{border-color:var(--marteau)}
+  .mode-btn b{font-size:17px}
+  .mode-btn span{color:var(--muted);font-size:12.5px;line-height:1.4}
+
+  /* Jeu */
+  #game{flex:1;display:flex;flex-direction:column;gap:7px;min-height:0}
+  .topbar{display:flex;align-items:center;gap:10px;flex:0 0 auto}
+  .back{padding:5px 9px;border:1px solid var(--line);border-radius:8px;color:var(--muted);font-size:13px}
+  .topbar .title{font-weight:700;letter-spacing:.12em;font-size:15px}
+  .topbar .mode-tag{margin-left:auto;color:var(--muted);font-size:11px;letter-spacing:.14em;text-transform:uppercase}
+
+  .board-wrap{flex:1 1 auto;min-height:0;display:flex;align-items:center;justify-content:center}
+  .grid{height:100%;max-width:100%;display:grid;gap:4px;background:var(--surface);padding:4px;
+    border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);touch-action:none}
+  .cell{position:relative;border-radius:6px;background:var(--line-soft);
+    display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.5);
+    user-select:none;transition:transform .08s, box-shadow .12s}
+  .cell.filled{box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)}
+  .cell .label{pointer-events:none;font-weight:600;mix-blend-mode:overlay;font-size:clamp(9px,2.4vw,13px)}
+  .cell.ghost{outline:2px dashed var(--eclat);outline-offset:-3px;background:rgba(224,179,94,.12)}
+  .cell.ghost-bad{outline:2px dashed var(--bad);outline-offset:-3px}
+  .cell.smash.filled:active{box-shadow:inset 0 0 0 2px var(--marteau)}
+  .cell.pop{animation:pop .26s ease}
+  @keyframes pop{0%{transform:scale(.7);filter:brightness(1.6)}60%{transform:scale(1.06)}100%{transform:scale(1)}}
+  .cell.hintglow{outline:2px solid var(--essence);outline-offset:-3px;animation:hintp 1.1s ease-in-out infinite}
+  @keyframes hintp{50%{outline-color:rgba(169,143,214,.35)}}
+
+  /* Ressources */
+  .resbar{flex:0 0 auto;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+    padding:7px 9px;display:flex;gap:10px;align-items:center;justify-content:space-between}
+  .res{display:flex;align-items:center;gap:5px;min-width:0}
+  .res .ico{font-size:13px}
+  .res .cubes{display:flex;gap:2px;flex-wrap:nowrap;overflow:hidden;max-width:120px}
+  .res .cube{width:9px;height:9px;border-radius:2px;background:var(--line-soft);border:1px solid var(--line);flex:0 0 auto}
+  .res .cube.on{background:var(--eclat);border-color:var(--eclat)}
+  .res.mk .cube.on{background:var(--marteau);border-color:var(--marteau)}
+  .res.es .cube.on{background:var(--essence);border-color:var(--essence)}
+  .res .val{font-weight:700;font-size:13px;min-width:14px;text-align:right}
+
+  /* Atelier */
+  .atelier{flex:0 0 auto;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:8px}
+  .atelier .head{display:flex;align-items:center;justify-content:space-between;margin-bottom:7px}
+  .atelier .head .t{color:var(--muted);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase}
+  .slots{display:flex;gap:8px;justify-content:center}
+  .slot{flex:1;background:var(--surface-2);border:1px solid var(--line);border-radius:8px;
+    height:60px;display:flex;align-items:center;justify-content:center;padding:5px;
+    touch-action:none;transition:border-color .12s, box-shadow .12s}
+  .slot[aria-pressed="true"]{border-color:var(--eclat);box-shadow:0 0 0 1px var(--eclat)}
+  .slot.dragging{opacity:.45}
+  .slot .mini{display:grid;gap:2px;pointer-events:none}
+  .slot .mini i{width:11px;height:11px;border-radius:2px;display:block}
+  .actions{display:flex;gap:5px;margin-top:8px}
+  .act{flex:1;min-width:0;background:var(--surface-2);border:1px solid var(--line);border-radius:8px;
+    padding:6px 3px;display:flex;flex-direction:column;gap:2px;align-items:center;transition:.12s}
+  .act:enabled:active{transform:scale(.96)}
+  .act:disabled{opacity:.36}
+  .act b{font-size:12px;white-space:nowrap}
+  .act .cost{color:var(--muted);font-size:9.5px;letter-spacing:.02em;white-space:nowrap}
+  .act.smashon{border-color:var(--marteau);box-shadow:0 0 0 1px var(--marteau)}
+
+  .palette{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+  .pal{width:34px;height:34px;border-radius:7px;border:2px solid transparent;transition:.12s}
+  .pal[aria-pressed="true"]{border-color:#fff;transform:scale(1.08)}
+
+  .status{flex:0 0 auto;min-height:16px;text-align:center;color:var(--muted);font-size:12.5px;line-height:1.3}
+
+  /* Aperçu de glisser */
+  #drag-preview{position:fixed;left:0;top:0;z-index:60;pointer-events:none;display:grid;
+    filter:drop-shadow(0 8px 14px rgba(0,0,0,.55));opacity:.92}
+  #drag-preview i{border-radius:5px;display:block}
+
+  /* Voiles */
+  .veil{position:fixed;inset:0;background:rgba(10,11,15,.78);backdrop-filter:blur(4px);
+    display:flex;align-items:center;justify-content:center;padding:18px;z-index:30}
+  .panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px;
+    max-width:400px;width:100%;box-shadow:var(--shadow);text-align:center}
+  .panel h2{font-size:19px;margin-bottom:6px}
+  .panel .art{height:120px;border-radius:10px;margin:13px 0;
+    background:repeating-linear-gradient(45deg,#222631 0 10px,#272c38 10px 20px);
+    display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:12px;letter-spacing:.1em}
+  .panel p{color:var(--muted);line-height:1.5;font-size:14px}
+  .panel .row{display:flex;gap:10px;margin-top:16px}
+  .btn{flex:1;padding:11px;border-radius:9px;background:var(--surface-2);border:1px solid var(--line);font-weight:600}
+  .btn.primary{background:var(--eclat);color:#1a160a;border-color:var(--eclat)}
+  .btn:disabled{opacity:.4}
+
+  /* Éditeur de tesselle */
+  .editor{display:grid;gap:4px;justify-content:center;margin:12px 0 6px}
+  .ecell{width:32px;height:32px;border-radius:5px;background:var(--surface-2);border:1px solid var(--line);transition:.1s}
+  .ecell.void{opacity:.1;pointer-events:none}
+  .ecell.lock{box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)}
+  .picker-hint{color:var(--muted);font-size:12px;margin-bottom:6px}
+  .picker{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:4px 0 2px}
+  .pk{position:relative;width:30px;height:30px;border-radius:7px;border:2px solid transparent}
+  .pk[aria-pressed="true"]{border-color:#fff}
+  .pk:disabled{opacity:.25;cursor:not-allowed}
+  .pk b{position:absolute;right:-4px;bottom:-6px;font-size:9px;font-weight:700;
+    background:#0009;color:#fff;border-radius:7px;padding:0 4px;min-width:13px;line-height:14px}
+  .edit-cost{color:var(--muted);font-size:12px;margin-top:8px}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ACCUEIL -->
+  <section id="home">
+    <div>
+      <div class="brand">TESSERA</div>
+      <div class="brand-sub">mosaïque &amp; motifs</div>
+    </div>
+    <div>
+      <div class="card-label">Thème</div>
+      <div class="themes" id="themes"></div>
+    </div>
+    <div>
+      <div class="card-label">Mode</div>
+      <div class="modes">
+        <button class="mode-btn" data-mode="detente"><b>Détente</b><span>Pose libre, sans règle. Une case à la fois.</span></button>
+        <button class="mode-btn" data-mode="histoire"><b>Histoire</b><span>Complète la grille et révèle le motif caché.</span></button>
+      </div>
+    </div>
+  </section>
+
+  <!-- JEU -->
+  <section id="game" class="hidden">
+    <div class="topbar">
+      <button class="back" id="backBtn">‹ Accueil</button>
+      <span class="title">TESSERA</span>
+      <span class="mode-tag" id="modeTag"></span>
+    </div>
+
+    <div class="board-wrap"><div class="grid" id="grid"></div></div>
+
+    <div class="resbar" id="resbar">
+      <div class="res"><span class="ico">✦</span><span class="cubes" id="cubesE"></span><span class="val mono" id="valE">0</span></div>
+      <div class="res mk"><span class="ico">🔨</span><span class="cubes" id="cubesC"></span><span class="val mono" id="valC">0</span></div>
+      <div class="res es"><span class="ico">❖</span><span class="cubes" id="cubesS"></span><span class="val mono" id="valS">0</span></div>
+    </div>
+
+    <div class="atelier" id="atelier">
+      <div class="head"><span class="t">Atelier</span><span class="t">glisse pour poser · touche pour pivoter</span></div>
+      <div class="slots" id="slots"></div>
+      <div class="actions" id="actions">
+        <button class="act" id="smashBtn"><b>🔨</b><span class="cost">1🔨→✦</span></button>
+        <button class="act" id="convBtn"><b>❖</b><span class="cost">2✦→❖</span></button>
+        <button class="act" id="rerollBtn"><b>↻</b><span class="cost">1🔨</span></button>
+        <button class="act" id="modBtn"><b>✎</b><span class="cost">recolore</span></button>
+        <button class="act" id="createBtn"><b>＋</b><span class="cost">1❖+✦</span></button>
+      </div>
+    </div>
+
+    <div class="atelier hidden" id="paletteWrap">
+      <div class="head"><span class="t">Couleur</span><span class="t">pose libre</span></div>
+      <div class="palette" id="palette"></div>
+    </div>
+
+    <div class="status" id="status"></div>
+  </section>
+</div>
+
+<!-- Voile Histoire -->
+<div class="veil hidden" id="storyVeil">
+  <div class="panel">
+    <h2 id="storyTitle"></h2>
+    <div class="art" id="storyArt">[ illustration à venir ]</div>
+    <p id="storyText"></p>
+    <div class="row"><button class="btn primary" id="storyNext">Continuer</button></div>
+  </div>
+</div>
+
+<!-- Voile Éditeur -->
+<div class="veil hidden" id="editVeil">
+  <div class="panel">
+    <h2 id="editTitle">Modifier la tesselle</h2>
+    <div class="picker-hint" id="pkHint"></div>
+    <div class="editor" id="editor"></div>
+    <div class="picker" id="picker"></div>
+    <div class="edit-cost" id="editCost"></div>
+    <div class="row">
+      <button class="btn" id="editCancel">Annuler</button>
+      <button class="btn primary" id="editOk">Valider</button>
+    </div>
+  </div>
+</div>
+
+<script>
+"use strict";
+/* =====================================================================
+   TESSERA — POC pilotée par THEME.
+   motifs = teintes. tesselles = pièces posées. éclats = peinture colorée
+   (1 éclat de la couleur de la case détruite). essence = créer une tesselle.
+   ===================================================================== */
+const THEME = {
+  id:"poc", name:"Placeholder",
+  grid:{ cols:5, rows:7 },
+
+  motifs:[
+    { id:0, name:"Ambre",  color:"#e0a458" },
+    { id:1, name:"Jade",   color:"#5fa97f" },
+    { id:2, name:"Azur",   color:"#5b8fc9" },
+    { id:3, name:"Grenat", color:"#c8607a" },
+    { id:4, name:"Iris",   color:"#9b7fd0" },
+    { id:5, name:"Lin",    color:"#cfc9b4" },
+  ],
+
+  shapes:[
+    { id:"mono",   cells:[[0,0]] },
+    { id:"domino", cells:[[0,0],[0,1]] },
+    { id:"triI",   cells:[[0,0],[0,1],[0,2]] },
+    { id:"triL",   cells:[[0,0],[1,0],[1,1]] },
+    { id:"square", cells:[[0,0],[0,1],[1,0],[1,1]] },
+    { id:"tT",     cells:[[0,0],[0,1],[0,2],[1,1]] },
+    { id:"tL",     cells:[[0,0],[1,0],[2,0],[2,1]] },
+    { id:"tS",     cells:[[0,1],[0,2],[1,0],[1,1]] },
+  ],
+
+  rules:{
+    costs:{ reroll:{ charges:1 }, create:{ essence:1 } },   // modifier : coût = éclats peints
+    essenceFromEclats:2, slots:3, cubesShown:8,
+  },
+
+  story:[
+    { pattern:{type:"rowMono"},
+      unlock:{ title:"I · La première ligne",
+        text:"Une rangée d'une seule teinte traverse la mosaïque. Le mur se souvient de la lumière qui le frappait au matin." } },
+    { pattern:{type:"block2"},
+      unlock:{ title:"II · Le carré",
+        text:"Quatre tesselles identiques se rejoignent. Un fragment d'image affleure : une fenêtre, peut-être." } },
+    { pattern:{type:"colMono"},
+      unlock:{ title:"III · La colonne",
+        text:"Une colonne entière s'accorde. La paroi descend vers une porte que personne n'avait remarquée." } },
+    { pattern:{type:"diag3"},
+      unlock:{ title:"IV · L'oblique",
+        text:"Trois éclats d'une même couleur tracent une diagonale. La mosaïque pointe vers la suite." } },
+  ],
+};
+
+const MOTIF = id => THEME.motifs[id];
+const COLS = THEME.grid.cols, ROWS = THEME.grid.rows, NM = THEME.motifs.length;
+const rnd = n => Math.floor(Math.random()*n);
+const rndMotif = () => rnd(NM);
+
+/* ---------- patterns ---------- */
+const PATTERNS = {
+  rowMono(g){ for(let r=0;r<ROWS;r++){ const m=g[r][0]; if(m==null) continue;
+    if(g[r].every(c=>c===m)) return g[r].map((_,c)=>[r,c]); } return null; },
+  colMono(g){ for(let c=0;c<COLS;c++){ const m=g[0][c]; if(m==null) continue;
+    let ok=true; for(let r=0;r<ROWS;r++) if(g[r][c]!==m){ok=false;break;}
+    if(ok){ const a=[]; for(let r=0;r<ROWS;r++) a.push([r,c]); return a; } } return null; },
+  block2(g){ for(let r=0;r<ROWS-1;r++) for(let c=0;c<COLS-1;c++){ const m=g[r][c];
+    if(m!=null && g[r][c+1]===m && g[r+1][c]===m && g[r+1][c+1]===m)
+      return [[r,c],[r,c+1],[r+1,c],[r+1,c+1]]; } return null; },
+  diag3(g){
+    for(let r=0;r<ROWS-2;r++) for(let c=0;c<COLS-2;c++){ const m=g[r][c];
+      if(m!=null && g[r+1][c+1]===m && g[r+2][c+2]===m) return [[r,c],[r+1,c+1],[r+2,c+2]]; }
+    for(let r=0;r<ROWS-2;r++) for(let c=2;c<COLS;c++){ const m=g[r][c];
+      if(m!=null && g[r+1][c-1]===m && g[r+2][c-2]===m) return [[r,c],[r+1,c-1],[r+2,c-2]]; }
+    return null; },
+};
+const HINTS = {
+  rowMono:["Cherche un alignement…","…une rangée entière.","…d'une seule et même teinte."],
+  colMono:["Cherche un alignement…","…une colonne entière.","…d'une seule et même teinte."],
+  block2: ["Cherche un regroupement…","…un bloc compact.","…un carré de 2×2 identique."],
+  diag3:  ["Cherche une oblique…","…une diagonale.","…trois tesselles identiques en diagonale."],
+};
+
+/* ---------- état ---------- */
+const S = {
+  mode:null, grid:[], rowDone:[], colDone:[],
+  eclats:[],            // éclats[m] = nombre d'éclats de la couleur m
+  charges:0, essence:0,
+  atelier:[], activeSlot:null,
+  smash:false, palMotif:0,
+  storyIdx:0, hintLevel:0,
+  ghostCell:null,
+};
+let editorState=null;
+let drag=null;
+
+const $ = id => document.getElementById(id);
+const gridEl=$("grid"), statusEl=$("status");
+const totalEclats = () => S.eclats.reduce((a,b)=>a+b,0);
+
+/* ---------- accueil ---------- */
+function buildHome(){
+  const tc=$("themes"); tc.innerHTML="";
+  const card=document.createElement("button");
+  card.className="theme-card"; card.setAttribute("aria-pressed","true");
+  card.innerHTML=`<div>${THEME.name}</div><div class="swatches">${
+    THEME.motifs.map(m=>`<i style="background:${m.color}"></i>`).join("")}</div>`;
+  tc.appendChild(card);
+}
+document.querySelectorAll(".mode-btn").forEach(b=>b.addEventListener("click",()=>startGame(b.dataset.mode)));
+$("backBtn").addEventListener("click",()=>{ $("game").classList.add("hidden"); $("home").classList.remove("hidden"); });
+
+/* ---------- démarrage ---------- */
+function startGame(mode){
+  S.mode=mode;
+  S.grid=Array.from({length:ROWS},()=>Array(COLS).fill(null));
+  S.rowDone=Array(ROWS).fill(false); S.colDone=Array(COLS).fill(false);
+  S.eclats=Array(NM).fill(0); S.charges=0; S.essence=0;
+  S.activeSlot=null; S.smash=false; S.ghostCell=null;
+  S.storyIdx=0; S.hintLevel=0;
+  if(mode==="histoire") S.atelier=Array.from({length:THEME.rules.slots},()=>newPiece());
+
+  $("home").classList.add("hidden"); $("game").classList.remove("hidden");
+  $("modeTag").textContent = mode==="detente" ? "Détente" : "Histoire";
+  $("atelier").classList.toggle("hidden", mode!=="histoire");
+  $("resbar").classList.toggle("hidden", mode!=="histoire");
+  $("paletteWrap").classList.toggle("hidden", mode!=="detente");
+
+  buildGrid();
+  if(mode==="detente"){ buildPalette(); setStatus("Choisis une couleur, puis touche une case."); }
+  else { renderAtelier(); renderRes(); setStatus("Glisse une tesselle sur la grille."); }
+}
+
+/* ---------- grille ---------- */
+function buildGrid(){
+  gridEl.style.gridTemplateColumns=`repeat(${COLS},1fr)`;
+  gridEl.style.gridTemplateRows=`repeat(${ROWS},1fr)`;
+  gridEl.style.aspectRatio=`${COLS} / ${ROWS}`;
+  gridEl.innerHTML="";
+  for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++){
+    const d=document.createElement("div");
+    d.className="cell"; d.dataset.r=r; d.dataset.c=c;
+    d.addEventListener("click",()=>onCell(r,c));
+    gridEl.appendChild(d);
+  }
+  paintGrid();
+}
+function cellEl(r,c){ return gridEl.children[r*COLS+c]; }
+function paintCell(r,c){
+  const el=cellEl(r,c), m=S.grid[r][c];
+  el.classList.toggle("filled", m!=null);
+  el.classList.toggle("smash", S.smash);
+  if(m!=null){ el.style.background=MOTIF(m).color; el.innerHTML=`<span class="label">${MOTIF(m).name[0]}</span>`; }
+  else { el.style.background=""; el.innerHTML=""; }
+}
+function paintGrid(){ for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++) paintCell(r,c); }
+
+function clearGhost(){ document.querySelectorAll(".cell.ghost,.cell.ghost-bad").forEach(e=>e.classList.remove("ghost","ghost-bad")); }
+function paintGhost(){
+  clearGhost();
+  if(!drag || !drag.started || !S.ghostCell) return;
+  const cells=oriented(drag.piece,drag.piece.rot).cells.map(([dr,dc])=>[S.ghostCell.r+dr,S.ghostCell.c+dc]);
+  const ok=fits(cells);
+  cells.forEach(([r,c])=>{ if(r>=0&&r<ROWS&&c>=0&&c<COLS) cellEl(r,c).classList.add(ok?"ghost":"ghost-bad"); });
+}
+
+/* ---------- pièces ---------- */
+function newPiece(){
+  const base=THEME.shapes[rnd(THEME.shapes.length)];
+  return { cells:base.cells.map(c=>c.slice()), motifs:base.cells.map(()=>rndMotif()), rot:0 };
+}
+function oriented(piece,rot){
+  let cells=piece.cells.map(c=>c.slice());
+  for(let i=0;i<(rot%4+4)%4;i++) cells=cells.map(([r,c])=>[c,-r]);
+  const minR=Math.min(...cells.map(c=>c[0])), minC=Math.min(...cells.map(c=>c[1]));
+  cells=cells.map(([r,c])=>[r-minR,c-minC]);
+  return { cells, motifs:piece.motifs.slice() };
+}
+function fits(cells){ return cells.every(([r,c])=> r>=0&&r<ROWS&&c>=0&&c<COLS && S.grid[r][c]==null); }
+
+/* ---------- grille : détente + marteau ---------- */
+function onCell(r,c){
+  if(S.mode==="detente"){ S.grid[r][c]=S.palMotif; paintCell(r,c); pop(r,c); return; }
+  if(S.smash){ smashAt(r,c); return; }
+}
+function pop(r,c){ const el=cellEl(r,c); el.classList.remove("pop"); void el.offsetWidth; el.classList.add("pop"); }
+
+/* ---------- charges ---------- */
+function awardCharges(){
+  let got=0;
+  for(let r=0;r<ROWS;r++) if(!S.rowDone[r] && S.grid[r].every(c=>c!=null)){ S.rowDone[r]=true; got++; }
+  for(let c=0;c<COLS;c++){ if(S.colDone[c]) continue;
+    let full=true; for(let r=0;r<ROWS;r++) if(S.grid[r][c]==null){full=false;break;}
+    if(full){ S.colDone[c]=true; got++; } }
+  if(got>0){ S.charges+=got; setStatus(`+${got} charge${got>1?"s":""} de marteau 🔨`); }
+}
+
+/* ---------- marteau : éclat de la couleur détruite ---------- */
+function toggleSmash(){
+  if(S.charges<1 && !S.smash){ setStatus("Pas de charge de marteau."); return; }
+  S.smash=!S.smash; $("smashBtn").classList.toggle("smashon",S.smash);
+  paintGrid(); setStatus(S.smash ? "Touche une case à détruire 🔨" : "");
+}
+function smashAt(r,c){
+  const m=S.grid[r][c];
+  if(m==null) return;
+  if(S.charges<1){ setStatus("Pas de charge."); return; }
+  S.charges--; S.eclats[m]++; S.grid[r][c]=null; paintCell(r,c); pop(r,c);
+  S.smash=false; $("smashBtn").classList.remove("smashon"); paintGrid();
+  renderRes(); setStatus(`Case brisée · +1 éclat ${MOTIF(m).name} ✦`);
+}
+
+/* =====================================================================
+   ATELIER + GLISSER-DÉPOSER
+   ===================================================================== */
+function renderAtelier(){
+  const sl=$("slots"); sl.innerHTML="";
+  S.atelier.forEach((p,i)=>{
+    const b=document.createElement("button");
+    b.className="slot"; b.setAttribute("aria-pressed", String(S.activeSlot===i));
+    b.appendChild(miniOf(p,11));
+    b.addEventListener("pointerdown",e=>startDrag(e,i,b));
+    sl.appendChild(b);
+  });
+  updateActions();
+}
+function miniOf(p,px){
+  const o=oriented(p,p.rot);
+  const maxC=Math.max(...o.cells.map(c=>c[1]))+1, maxR=Math.max(...o.cells.map(c=>c[0]))+1;
+  const g=document.createElement("div"); g.className="mini";
+  g.style.gridTemplateColumns=`repeat(${maxC},${px}px)`;
+  const map={}; o.cells.forEach(([r,c],k)=>map[r+"_"+c]=o.motifs[k]);
+  for(let r=0;r<maxR;r++) for(let c=0;c<maxC;c++){
+    const i2=document.createElement("i"); const m=map[r+"_"+c];
+    i2.style.background = m==null ? "transparent" : MOTIF(m).color; g.appendChild(i2);
+  }
+  return g;
+}
+function startDrag(e,i,el){
+  if(!S.atelier[i]) return;
+  if(S.smash) toggleSmash();
+  S.activeSlot=i; updateActions();
+  document.querySelectorAll(".slot").forEach((s,k)=>s.setAttribute("aria-pressed",String(k===i)));
+  drag={ slot:i, piece:S.atelier[i], started:false, sx:e.clientX, sy:e.clientY, pid:e.pointerId, el };
+  try{ el.setPointerCapture(e.pointerId); }catch(_){}
+  el.addEventListener("pointermove",onDragMove);
+  el.addEventListener("pointerup",onDragEnd);
+  el.addEventListener("pointercancel",onDragEnd);
+}
+function onDragMove(e){
+  if(!drag) return;
+  const dx=e.clientX-drag.sx, dy=e.clientY-drag.sy;
+  if(!drag.started){ if(Math.hypot(dx,dy)<8) return; drag.started=true; drag.el.classList.add("dragging"); buildPreview(); }
+  e.preventDefault();
+  movePreview(e.clientX,e.clientY);
+  const cell=cellUnder(e.clientX,e.clientY);
+  S.ghostCell = cell ? {r:cell.r,c:cell.c} : null;
+  paintGhost();
+}
+function onDragEnd(){
+  if(!drag) return;
+  const el=drag.el;
+  el.removeEventListener("pointermove",onDragMove);
+  el.removeEventListener("pointerup",onDragEnd);
+  el.removeEventListener("pointercancel",onDragEnd);
+  try{ el.releasePointerCapture(drag.pid); }catch(_){}
+  el.classList.remove("dragging");
+  if(drag.started){
+    if(S.ghostCell) dropTesselle(drag.slot, S.ghostCell.r, S.ghostCell.c);
+    else setStatus("Lâchée hors de la grille.");
+    removePreview(); S.ghostCell=null; clearGhost();
+  } else { const p=S.atelier[drag.slot]; if(p){ p.rot=(p.rot+1)%4; renderAtelier(); } }
+  drag=null;
+}
+function cellUnder(x,y){
+  const t=document.elementFromPoint(x,y);
+  if(t && t.classList.contains("cell")) return { r:+t.dataset.r, c:+t.dataset.c };
+  return null;
+}
+function dropTesselle(slot,r,c){
+  const piece=S.atelier[slot];
+  const o=oriented(piece,piece.rot);
+  const target=o.cells.map(([dr,dc])=>[r+dr,c+dc]);
+  if(!fits(target)){ setStatus("La tesselle ne rentre pas ici."); return; }
+  target.forEach(([rr,cc],k)=>{ S.grid[rr][cc]=o.motifs[k]; paintCell(rr,cc); pop(rr,cc); });
+  S.atelier[slot]=newPiece();
+  renderAtelier(); awardCharges(); renderRes(); checkGrid();
+}
+function buildPreview(){
+  removePreview();
+  const px=Math.max(18,Math.round(cellEl(0,0).getBoundingClientRect().width));
+  const o=oriented(drag.piece,drag.piece.rot);
+  const maxC=Math.max(...o.cells.map(c=>c[1]))+1, maxR=Math.max(...o.cells.map(c=>c[0]))+1;
+  const wrap=document.createElement("div"); wrap.id="drag-preview";
+  wrap.style.gridTemplateColumns=`repeat(${maxC},${px}px)`;
+  wrap.style.gridTemplateRows=`repeat(${maxR},${px}px)`; wrap.style.gap="4px";
+  const map={}; o.cells.forEach(([r,c],k)=>map[r+"_"+c]=o.motifs[k]);
+  for(let r=0;r<maxR;r++) for(let c=0;c<maxC;c++){
+    const i=document.createElement("i");
+    if(map[r+"_"+c]==null){ i.style.background="transparent"; }
+    else { i.style.background=MOTIF(map[r+"_"+c]).color; i.style.width=px+"px"; i.style.height=px+"px"; }
+    wrap.appendChild(i);
+  }
+  drag.px=px; document.body.appendChild(wrap);
+}
+function movePreview(x,y){ const w=$("drag-preview"); if(!w) return; const h=(drag.px||24)/2; w.style.transform=`translate(${x-h}px, ${y-h}px)`; }
+function removePreview(){ const w=$("drag-preview"); if(w) w.remove(); }
+
+/* ---------- actions atelier ---------- */
+function spendTwoEclats(){
+  for(let i=0;i<2;i++){ let best=-1;
+    S.eclats.forEach((n,m)=>{ if(n>0 && (best<0||n>S.eclats[best])) best=m; });
+    if(best>=0) S.eclats[best]--;
+  }
+}
+function updateActions(){
+  $("smashBtn").disabled  = S.charges<1;
+  $("convBtn").disabled   = totalEclats() < THEME.rules.essenceFromEclats;
+  $("rerollBtn").disabled = !(S.activeSlot!=null && S.charges>=THEME.rules.costs.reroll.charges);
+  $("modBtn").disabled    = !(S.activeSlot!=null && totalEclats()>0);
+  $("createBtn").disabled = !(S.essence>=THEME.rules.costs.create.essence && totalEclats()>0);
+}
+$("smashBtn").addEventListener("click",toggleSmash);
+$("convBtn").addEventListener("click",()=>{
+  if(totalEclats()<THEME.rules.essenceFromEclats) return;
+  spendTwoEclats(); S.essence++;
+  renderRes(); setStatus("+1 essence ❖");
+});
+$("rerollBtn").addEventListener("click",()=>{
+  if(S.activeSlot==null || S.charges<THEME.rules.costs.reroll.charges) return;
+  S.charges-=THEME.rules.costs.reroll.charges; S.atelier[S.activeSlot]=newPiece();
+  renderAtelier(); renderRes(); setStatus("Tesselle refaite ↻");
+});
+$("modBtn").addEventListener("click",()=>{
+  if(S.activeSlot==null || totalEclats()<=0) return;
+  openEditor("modify", S.atelier[S.activeSlot]);
+});
+$("createBtn").addEventListener("click",()=>{
+  if(S.essence<THEME.rules.costs.create.essence || totalEclats()<=0) return;
+  openEditor("create", null);
+});
+
+/* =====================================================================
+   ÉDITEUR DE TESSELLE
+   - les éclats sont la peinture : chaque case colorée = 1 éclat de sa couleur.
+   - modify : forme verrouillée (la tesselle active), tu recolores ses cases.
+   - create : 1 essence + tu dessines forme & couleurs librement.
+   ===================================================================== */
+const ED=4;
+function openEditor(kind,piece){
+  const locked = kind==="modify";
+  const shapeMask=Array.from({length:ED},()=>Array(ED).fill(!locked)); // create: toutes utilisables
+  const cells=Array.from({length:ED},()=>Array(ED).fill(null));
+  if(locked && piece){
+    shapeMask.forEach(row=>row.fill(false));
+    oriented(piece,piece.rot).cells.forEach(([r,c])=>{ if(r<ED&&c<ED) shapeMask[r][c]=true; });
+  }
+  editorState={ kind, locked, shapeMask, cells, color:firstAvailColor() };
+  $("editTitle").textContent = locked ? "Recolorer la tesselle" : "Créer une tesselle";
+  $("pkHint").textContent = locked
+    ? "Peins chaque case avec tes éclats (1 case = 1 éclat de cette couleur)."
+    : "1 essence ❖ + 1 éclat par case. Touche pour peindre / effacer.";
+  renderEditor();
+  $("editVeil").classList.remove("hidden");
+}
+function firstAvailColor(){ for(let m=0;m<NM;m++) if(S.eclats[m]>0) return m; return 0; }
+function usedInEditor(m){
+  let n=0; editorState.cells.forEach(row=>row.forEach(v=>{ if(v===m) n++; })); return n;
+}
+function availOf(m){ return S.eclats[m]-usedInEditor(m); }
+function renderEditor(){
+  const ed=$("editor"); ed.style.gridTemplateColumns=`repeat(${ED},32px)`; ed.innerHTML="";
+  for(let r=0;r<ED;r++) for(let c=0;c<ED;c++){
+    const b=document.createElement("button"); b.className="ecell";
+    const usable=editorState.shapeMask[r][c];
+    if(!usable){ b.classList.add("void"); }
+    else{
+      if(editorState.locked) b.classList.add("lock");
+      const v=editorState.cells[r][c];
+      if(v!=null) b.style.background=MOTIF(v).color;
+      b.addEventListener("click",()=>paintEditorCell(r,c));
+    }
+    ed.appendChild(b);
+  }
+  // palette avec compteur d'éclats restants
+  const pk=$("picker"); pk.innerHTML="";
+  THEME.motifs.forEach(m=>{
+    const b=document.createElement("button"); b.className="pk"; b.style.background=m.color;
+    b.setAttribute("aria-pressed",String(m.id===editorState.color));
+    b.disabled = S.eclats[m.id]===0;
+    b.innerHTML=`<b>${availOf(m.id)}</b>`;
+    b.addEventListener("click",()=>{ if(b.disabled) return; editorState.color=m.id; renderEditor(); });
+    pk.appendChild(b);
+  });
+  // coût & validité
+  const need=editorCost();
+  const filled=need.total, all=lockedAllFilled();
+  let label, okBtn;
+  if(editorState.locked){
+    okBtn = all && affordable(need.per);
+    label = `Coût : ${filled} éclat${filled>1?"s":""}` + (all?"":" · colore toutes les cases");
+  } else {
+    okBtn = filled>0 && S.essence>=THEME.rules.costs.create.essence && affordable(need.per);
+    label = `Coût : 1 essence ❖ + ${filled} éclat${filled>1?"s":""}`;
+  }
+  $("editCost").textContent=label;
+  $("editOk").disabled=!okBtn;
+}
+function paintEditorCell(r,c){
+  if(!editorState.shapeMask[r][c]) return;
+  const sel=editorState.color, cur=editorState.cells[r][c];
+  if(!editorState.locked && cur===sel){ editorState.cells[r][c]=null; renderEditor(); return; } // effacer (create)
+  // poser/recolorer : besoin d'un éclat dispo de sel (hors contribution actuelle de cette case)
+  const free = S.eclats[sel] - (usedInEditor(sel) - (cur===sel?1:0));
+  if(free<=0){ setStatus(`Plus d'éclat ${MOTIF(sel).name}.`); return; }
+  editorState.cells[r][c]=sel; renderEditor();
+}
+function editorCost(){
+  const per=Array(NM).fill(0); let total=0;
+  editorState.cells.forEach(row=>row.forEach(v=>{ if(v!=null){ per[v]++; total++; } }));
+  return { per, total };
+}
+function affordable(per){ return per.every((n,m)=>n<=S.eclats[m]); }
+function lockedAllFilled(){
+  if(!editorState.locked) return true;
+  for(let r=0;r<ED;r++) for(let c=0;c<ED;c++) if(editorState.shapeMask[r][c] && editorState.cells[r][c]==null) return false;
+  return true;
+}
+$("editCancel").addEventListener("click",()=>$("editVeil").classList.add("hidden"));
+$("editOk").addEventListener("click",()=>{
+  const filled=[];
+  for(let r=0;r<ED;r++) for(let c=0;c<ED;c++) if(editorState.cells[r][c]!=null) filled.push([r,c,editorState.cells[r][c]]);
+  if(filled.length===0){ setStatus("La tesselle est vide."); return; }
+  const need=editorCost();
+  if(!affordable(need.per)){ setStatus("Pas assez d'éclats."); return; }
+  if(editorState.locked && !lockedAllFilled()){ setStatus("Colore toutes les cases."); return; }
+  if(!editorState.locked && S.essence<THEME.rules.costs.create.essence){ setStatus("Il faut 1 essence."); return; }
+
+  // consommer
+  need.per.forEach((n,m)=>{ S.eclats[m]-=n; });
+  if(!editorState.locked) S.essence-=THEME.rules.costs.create.essence;
+
+  // construire la tesselle (normalisée)
+  const minR=Math.min(...filled.map(f=>f[0])), minC=Math.min(...filled.map(f=>f[1]));
+  const piece={ cells:filled.map(f=>[f[0]-minR,f[1]-minC]), motifs:filled.map(f=>f[2]), rot:0 };
+  const slot=(S.activeSlot!=null)?S.activeSlot:0;
+  S.atelier[slot]=piece;
+
+  $("editVeil").classList.add("hidden");
+  renderAtelier(); renderRes(); setStatus(editorState.locked?"Tesselle recolorée ✎":"Tesselle créée ＋");
+});
+
+/* ---------- ressources ---------- */
+function renderRes(){
+  renderEclatCubes(); $("valE").textContent=totalEclats();
+  cubes("cubesC",S.charges); $("valC").textContent=S.charges;
+  cubes("cubesS",S.essence); $("valS").textContent=S.essence;
+  updateActions();
+}
+function renderEclatCubes(){
+  const box=$("cubesE"); box.innerHTML="";
+  const list=[]; S.eclats.forEach((n,m)=>{ for(let k=0;k<n;k++) list.push(m); });
+  const cap=THEME.rules.cubesShown;
+  if(list.length===0){ for(let i=0;i<3;i++){ const d=document.createElement("div"); d.className="cube"; box.appendChild(d); } return; }
+  list.slice(0,cap).forEach(m=>{ const d=document.createElement("div"); d.className="cube on";
+    d.style.background=MOTIF(m).color; d.style.borderColor=MOTIF(m).color; box.appendChild(d); });
+}
+function cubes(id,n){
+  const box=$(id), max=THEME.rules.cubesShown; box.innerHTML="";
+  const shown=Math.min(n,max);
+  for(let i=0;i<max;i++){ const d=document.createElement("div"); d.className="cube"+(i<shown?" on":""); box.appendChild(d); }
+}
+
+/* ---------- palette détente ---------- */
+function buildPalette(){
+  const p=$("palette"); p.innerHTML="";
+  THEME.motifs.forEach(m=>{
+    const b=document.createElement("button"); b.className="pal"; b.style.background=m.color;
+    b.setAttribute("aria-pressed",String(m.id===S.palMotif));
+    b.addEventListener("click",()=>{ S.palMotif=m.id;
+      p.querySelectorAll(".pal").forEach((x,i)=>x.setAttribute("aria-pressed",String(i===m.id))); });
+    p.appendChild(b);
+  });
+}
+
+/* ---------- histoire ---------- */
+function gridFull(){ return S.grid.every(row=>row.every(c=>c!=null)); }
+function checkGrid(){
+  if(S.mode!=="histoire" || !gridFull()) return;
+  const entry=THEME.story[S.storyIdx];
+  if(!entry){ setStatus("Fin du POC — plus de chapitre."); return; }
+  const hit=PATTERNS[entry.pattern.type](S.grid);
+  if(hit){ revealStory(entry,hit); }
+  else {
+    const max=HINTS[entry.pattern.type].length;
+    S.hintLevel=Math.min(S.hintLevel+1,max);
+    setStatus("Grille pleine, motif absent. Indice : "+(HINTS[entry.pattern.type][S.hintLevel-1]||""));
+  }
+}
+function revealStory(entry,cells){
+  cells.forEach(([r,c])=>cellEl(r,c).classList.add("hintglow"));
+  setTimeout(()=>{
+    $("storyTitle").textContent=entry.unlock.title;
+    $("storyText").textContent=entry.unlock.text;
+    $("storyVeil").classList.remove("hidden");
+  },520);
+}
+$("storyNext").addEventListener("click",()=>{
+  $("storyVeil").classList.add("hidden");
+  S.storyIdx++; S.hintLevel=0;
+  S.grid=Array.from({length:ROWS},()=>Array(COLS).fill(null));
+  S.rowDone=Array(ROWS).fill(false); S.colDone=Array(COLS).fill(false);
+  S.atelier=Array.from({length:THEME.rules.slots},()=>newPiece());
+  S.activeSlot=null;
+  paintGrid(); renderAtelier(); renderRes();
+  setStatus(THEME.story[S.storyIdx] ? "Nouveau chapitre — nouveau motif caché." : "Fin du POC — bravo !");
+});
+
+function setStatus(t){ statusEl.textContent=t; }
+buildHome();
+</script>
+</body>
+</html>

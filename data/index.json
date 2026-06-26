@@ -1,0 +1,10 @@
+{
+  "themes": [
+    {
+      "id": "poc",
+      "name": "Placeholder",
+      "file": "data/themes/poc.json",
+      "storyFile": "data/stories/poc.json"
+    }
+  ]
+}

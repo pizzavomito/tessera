@@ -1,0 +1,37 @@
+{
+  "id": "poc",
+  "name": "Placeholder",
+  "storyFile": "data/stories/poc.json",
+
+  "grid": { "cols": 5, "rows": 7 },
+
+  "motifs": [
+    { "id": 0, "name": "Ambre",  "color": "#e0a458" },
+    { "id": 1, "name": "Jade",   "color": "#5fa97f" },
+    { "id": 2, "name": "Azur",   "color": "#5b8fc9" },
+    { "id": 3, "name": "Grenat", "color": "#c8607a" },
+    { "id": 4, "name": "Iris",   "color": "#9b7fd0" },
+    { "id": 5, "name": "Lin",    "color": "#cfc9b4" }
+  ],
+
+  "shapes": [
+    { "id": "mono",   "cells": [[0,0]] },
+    { "id": "domino", "cells": [[0,0],[0,1]] },
+    { "id": "triI",   "cells": [[0,0],[0,1],[0,2]] },
+    { "id": "triL",   "cells": [[0,0],[1,0],[1,1]] },
+    { "id": "square", "cells": [[0,0],[0,1],[1,0],[1,1]] },
+    { "id": "tT",     "cells": [[0,0],[0,1],[0,2],[1,1]] },
+    { "id": "tL",     "cells": [[0,0],[1,0],[2,0],[2,1]] },
+    { "id": "tS",     "cells": [[0,1],[0,2],[1,0],[1,1]] }
+  ],
+
+  "rules": {
+    "costs": {
+      "reroll": { "charges": 1 },
+      "create": { "essence": 1 }
+    },
+    "essenceFromEclats": 2,
+    "slots": 3,
+    "cubesShown": 8
+  }
+}
