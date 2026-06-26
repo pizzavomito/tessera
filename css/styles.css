@@ -53,7 +53,7 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
   border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);touch-action:none}
 
 /* Grille incrustée dans une illustration de fond (THEME.grid.bg) */
-.board-frame{position:relative;height:100%;max-width:100%}
+.board-frame{position:relative;width:auto;height:auto;max-width:100%;max-height:100%}
 .board-bg{position:absolute;inset:0;width:100%;height:100%;display:block}
 .grid.embedded{position:absolute;height:auto;max-width:none;gap:2px;
   background:transparent;border:none;border-radius:0;box-shadow:none;padding:0}
