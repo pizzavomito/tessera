@@ -1,15 +1,20 @@
 // sw.js — service worker PWA.
 // Bump CACHE à chaque changement d'assets pour forcer la mise à jour.
-const CACHE = 'tessera-v6';
+const CACHE = 'tessera-v8';
 
 const SHELL = [
   './', './index.html', './manifest.webmanifest', './css/styles.css',
   './js/main.js', './js/home.js', './js/theme.js', './js/state.js',
   './js/patterns.js', './js/tesselle.js', './js/grid.js', './js/resources.js',
   './js/atelier.js', './js/editor.js', './js/engine.js', './js/story.js',
+  './js/capture.js',
   './data/index.json', './data/themes/poc.json', './data/stories/poc.json',
   './icons/icon-192.png', './icons/icon-512.png',
 ];
+
+self.addEventListener('message', e => {
+  if (e.data === 'version') e.source.postMessage(CACHE);
+});
 
 self.addEventListener('install', e => {
   e.waitUntil(

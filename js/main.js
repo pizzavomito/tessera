@@ -5,16 +5,26 @@ import { initAtelierActions } from './atelier.js';
 import { initEditor } from './editor.js';
 import { initStory } from './story.js';
 import { initEclatZoom } from './resources.js';
+import { initCapture } from './capture.js';
+import { $ } from './state.js';
 
 initAtelierActions();
 initEditor();
 initStory();
 initEclatZoom();
+initCapture();
 initHome();
 
 // PWA : service worker (nécessite HTTPS ou localhost ; GitHub Pages est en HTTPS).
 if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.addEventListener('message', e => {
+    const v = $('appVersion');
+    if (v) v.textContent = String(e.data).replace(/^tessera-/, '');
+  });
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js').catch(err => console.warn('SW non enregistré', err));
+    navigator.serviceWorker.register('./sw.js')
+      .then(() => navigator.serviceWorker.ready)
+      .then(reg => reg.active && reg.active.postMessage('version'))
+      .catch(err => console.warn('SW non enregistré', err));
   });
 }

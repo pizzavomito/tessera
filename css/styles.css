@@ -27,6 +27,7 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 .brand{font-size:clamp(40px,14vw,62px);font-weight:750;letter-spacing:.14em;
   background:linear-gradient(180deg,#fff,var(--eclat));-webkit-background-clip:text;background-clip:text;color:transparent}
 .brand-sub{color:var(--muted);letter-spacing:.32em;font-size:12px;text-transform:uppercase;margin-top:-12px}
+.app-version{color:var(--muted);font-size:11px;letter-spacing:.08em;margin-top:8px;opacity:.6}
 .card-label{color:var(--muted);font-size:12px;letter-spacing:.18em;text-transform:uppercase;margin-bottom:8px}
 .themes{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
 .theme-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
@@ -45,9 +46,10 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 /* Jeu */
 #game{flex:1;display:flex;flex-direction:column;gap:6px;min-height:0;position:relative}
 .topbar{display:flex;align-items:center;gap:10px;flex:0 0 auto}
-.back{flex:0 0 auto;width:28px;height:28px;display:flex;align-items:center;justify-content:center;
+.back,.icon-btn{flex:0 0 auto;width:28px;height:28px;display:flex;align-items:center;justify-content:center;
   border:1px solid var(--line);border-radius:8px;color:var(--muted);font-size:15px;transition:.12s}
-.back:hover{border-color:var(--marteau);color:var(--txt)}
+.back:hover,.icon-btn:hover{border-color:var(--marteau);color:var(--txt)}
+.icon-btn:disabled{opacity:.4}
 .topbar .title{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
   font-weight:700;letter-spacing:.06em;font-size:15px}
 .topbar .mode-tag{margin-left:auto;color:var(--muted);font-size:11px;letter-spacing:.14em;text-transform:uppercase}
