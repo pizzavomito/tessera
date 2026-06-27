@@ -63,6 +63,8 @@ Tous les chemins sont **relatifs** (`./js/...`, `./data/...`, `start_url: "."`),
    - `grid.bgWindow?` : `{ x, y, w, h }` en **pixels de l'image source** — la zone où la grille doit se positionner (coordonnées lisibles directement dans l'outil de dessin). Sans `bgWindow`, la grille occupe toute l'image.
    - `grid.emptyStyle?` : `"opaque"` (défaut, identique à aujourd'hui) · `"translucent"` · `"transparent"` — apparence des cases vides par-dessus le fond.
    - `grid.lineColor?` : couleur CSS (ex. `"rgba(216,179,94,.55)"`) du contour de chaque case — utile pour rendre la grille visible quand `emptyStyle` est `transparent`/`translucent`. Sans elle, pas de contour (identique à aujourd'hui).
+   - `style?` : personnalisation visuelle globale (couleurs + police), appliquée par `js/theme.js` en variables CSS racine. `style.colors.<clé>` (mêmes clés que les variables de `:root`, en camelCase : `ink, surface, surface2, line, lineSoft, txt, muted, eclat, marteau, essence, ok, bad`) écrase la couleur correspondante. `style.font.family` (valeur CSS `font-family`) change la police partout ; `style.font.url?` charge dynamiquement une feuille de police web (ex. Google Fonts) — dépendance réseau assumée, pas de repli hors-ligne. Toute clé absente retombe sur la valeur par défaut.
+   - `rules.atelierCompact?` : `true` démarre l'atelier replié (3 tesselles + bouton « Atelier complet » pour révéler les actions), `false`/absent = atelier complet comme aujourd'hui. Réversible par le joueur via le bouton dans les deux cas.
 2. (Optionnel) Créer une histoire `data/stories/<id>.json` (chapitres = `{ pattern, unlock }`).
 3. Référencer le thème dans `data/index.json` :
    ```json

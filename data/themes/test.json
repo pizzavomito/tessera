@@ -12,12 +12,17 @@
   },
 
   "motifs": [
-    { "id": 0, "name": "Ambre",  "color": "#e0a458" },
-    { "id": 1, "name": "Jade",   "color": "#5fa97f" },
-    { "id": 2, "name": "Azur",   "color": "#5b8fc9" },
-    { "id": 3, "name": "Grenat", "color": "#c8607a" },
-    { "id": 4, "name": "Iris",   "color": "#9b7fd0" },
-    { "id": 5, "name": "Lin",    "color": "#cfc9b4" }
+    { "id": 0,  "name": "Hortensia",     "color": "#4f95a3", "img": "assets/img/themes/test/motifs/1.png" },
+    { "id": 1,  "name": "Trèfle doré",   "color": "#d4a430", "img": "assets/img/themes/test/motifs/2.png" },
+    { "id": 2,  "name": "Marguerite",    "color": "#e8d9b0", "img": "assets/img/themes/test/motifs/3.png" },
+    { "id": 3,  "name": "Rose ancienne", "color": "#d8a78f", "img": "assets/img/themes/test/motifs/4.png" },
+    { "id": 4,  "name": "Camélia",       "color": "#36506b", "img": "assets/img/themes/test/motifs/5.png" },
+    { "id": 5,  "name": "Aile d'ambre",  "color": "#d9863a", "img": "assets/img/themes/test/motifs/6.png" },
+    { "id": 6,  "name": "Trèfle vert",   "color": "#7f9450", "img": "assets/img/themes/test/motifs/7.png" },
+    { "id": 7,  "name": "Papillon",      "color": "#cfd6c9", "img": "assets/img/themes/test/motifs/8.png" },
+    { "id": 8,  "name": "Coquille",      "color": "#c2a23a", "img": "assets/img/themes/test/motifs/9.png" },
+    { "id": 9,  "name": "Fougère brune", "color": "#6b4a32", "img": "assets/img/themes/test/motifs/10.png" },
+    { "id": 10, "name": "Fougère dorée", "color": "#a9803c", "img": "assets/img/themes/test/motifs/11.png" }
   ],
 
   "shapes": [
@@ -38,6 +43,29 @@
     },
     "essenceFromEclats": 2,
     "slots": 3,
-    "cubesShown": 8
+    "cubesShown": 24,
+    "atelierCompact": true
+  },
+
+  "style": {
+    "colors": {
+      "ink": "#1b1410",
+      "surface": "#241a14",
+      "surface2": "#2e231b",
+      "line": "#4a3526",
+      "lineSoft": "#3a2c22",
+      "txt": "#f3e9da",
+      "muted": "#b69d83",
+      "eclat": "#e0a458",
+      "marteau": "#7fa8c9",
+      "essence": "#c98fd6",
+      "ok": "#5fa97f",
+      "bad": "#c8607a"
+    },
+    "font": {
+      "family": "'Cinzel', serif",
+      "url": "https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700;800;900&display=swap"
+    },
+    "frames": false
   }
 }

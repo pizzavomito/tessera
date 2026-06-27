@@ -36,24 +36,29 @@
   <!-- JEU -->
   <section id="game" class="hidden">
     <div class="topbar">
-      <button class="back" id="backBtn">‹ Accueil</button>
-      <span class="title">TESSERA</span>
+      <button class="back" id="backBtn" aria-label="Accueil">←</button>
+      <span class="title" id="gameTitle">TESSERA</span>
       <span class="mode-tag" id="modeTag"></span>
     </div>
 
     <div class="board-wrap" id="boardWrap"></div>
 
-    <div class="resbar" id="resbar">
-      <div class="res"><span class="ico">✦</span><span class="cubes" id="cubesE"></span><span class="val mono" id="valE">0</span></div>
-      <div class="res mk"><span class="ico">🔨</span><span class="cubes" id="cubesC"></span><span class="val mono" id="valC">0</span></div>
-      <div class="res es"><span class="ico">❖</span><span class="cubes" id="cubesS"></span><span class="val mono" id="valS">0</span></div>
+    <div class="hud" id="hud">
+      <div class="slots" id="slots"></div>
+      <div class="hud-divider"></div>
+      <div class="resbar" id="resbar">
+        <button class="res mk" id="resSmash" title="Marteau"><span class="ico">🔨</span><span class="val mono" id="valC">0</span></button>
+        <div class="res es"><span class="ico">❖</span><span class="val mono" id="valS">0</span></div>
+        <div class="res ec">
+          <span class="ico">✦</span><span class="cubes" id="cubesE"></span>
+          <div class="cubes-zoom" id="cubesZoom"></div>
+        </div>
+      </div>
     </div>
 
-    <div class="atelier" id="atelier">
-      <div class="head"><span class="t">Atelier</span><span class="t">glisse pour poser · touche pour pivoter</span></div>
-      <div class="slots" id="slots"></div>
-      <div class="actions" id="actions">
-        <button class="act" id="smashBtn"><b>🔨</b><span class="cost">1🔨→✦</span></button>
+    <div class="actions" id="actions">
+      <button class="drawer-handle" id="atelierToggle"></button>
+      <div class="act-row">
         <button class="act" id="convBtn"><b>❖</b><span class="cost">2✦→❖</span></button>
         <button class="act" id="rerollBtn"><b>↻</b><span class="cost">1🔨</span></button>
         <button class="act" id="modBtn"><b>✎</b><span class="cost">recolore</span></button>

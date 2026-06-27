@@ -156,7 +156,7 @@ Chaque pattern a une liste d'indices (`HINTS[type]`). Si la grille est pleine sa
 
 - **Zéro scroll** : `.app` en `height:100dvh; overflow:hidden`. La grille absorbe l'espace restant ; le reste est compact.
 - **Mobile** : zoom double-tap désactivé (`maximum-scale=1`), interactions en Pointer Events.
-- **Tokens de couleur** (CSS variables) : fond ardoise `--ink:#14161c`, surfaces `--surface`, éclat ambre `--eclat:#e0b35e`, marteau acier `--marteau:#7fa8c9`, essence iris `--essence:#a98fd6`.
+- **Tokens de couleur** (CSS variables) : fond ardoise `--ink:#14161c`, surfaces `--surface`, éclat ambre `--eclat:#e0b35e`, marteau acier `--marteau:#7fa8c9`, essence iris `--essence:#a98fd6`. Personnalisables par thème via `THEME.style` (§12) — absent = ces valeurs par défaut.
 - **Aucun stockage navigateur** (`localStorage`/`sessionStorage`) — non supporté dans l'aperçu d'artefact. Pour la persistance, prévoir une autre approche en dehors de cet aperçu (voir Roadmap).
 
 ---
@@ -207,6 +207,27 @@ const THEME = {
     essenceFromEclats: 2,       // 2 éclats -> 1 essence
     slots: 3,                   // emplacements d'atelier
     cubesShown: 8,              // taille d'affichage de la barre de cubes
+    atelierCompact: false,      // optionnel : atelier replié au démarrage (3 tesselles + bouton). Défaut false = complet (comportement historique). Le joueur peut toujours basculer via le bouton.
+  },
+
+  // optionnel : personnalisation visuelle globale. Toute clé absente retombe
+  // sur la valeur par défaut de :root (styles.css) — rien à fournir si le
+  // thème se contente du style par défaut.
+  style: {
+    colors: {
+      // mêmes clés que les variables CSS de :root, en camelCase :
+      // ink, surface, surface2(--surface-2), line, lineSoft(--line-soft),
+      // txt, muted, eclat, marteau, essence, ok, bad.
+      eclat: "#e0a458",
+    },
+    font: {
+      family: "'Poppins', sans-serif",          // valeur CSS font-family
+      url: "https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;750&display=swap",
+      // url optionnelle : feuille de police chargée dynamiquement (<link> injecté
+      // par theme.js). Dépendance réseau assumée — pas de repli offline ; sans
+      // `url`, `family` doit désigner une police déjà disponible (système ou
+      // empaquetée dans le repo).
+    },
   },
 
   // une entrée = une grille d'histoire : pattern caché + déblocage
@@ -237,6 +258,7 @@ S = {
   eclats,                  // tableau par motif : eclats[motifId] = nombre
   charges, essence,        // entiers
   atelier,                 // [3] de tesselles
+  atelierExpanded,         // atelier complet (actions visibles) vs compact (3 tesselles + bouton) — init via THEME.rules.atelierCompact, bascule libre ensuite
   activeSlot,              // index de l'emplacement actif (cible des actions)
   smash,                   // mode marteau actif
   palMotif,                // couleur courante en mode Détente
@@ -254,7 +276,7 @@ S = {
 - **Grille** : `buildGrid()`, `cellEl()`, `paintCell()`, `paintGrid()`, `paintGhost()`, `clearGhost()`.
 - **Tesselles** : `newPiece()`, `oriented(piece, rot)`, `fits(cells)`.
 - **Glisser-déposer** : `startDrag()`, `onDragMove()`, `onDragEnd()`, `cellUnder()`, `dropTesselle()`, `buildPreview()`, `movePreview()`, `removePreview()`.
-- **Atelier / actions** : `renderAtelier()`, `miniOf()`, `updateActions()`, `spendTwoEclats()`, handlers reroll/convert/modify/create.
+- **Atelier / actions** : `renderAtelier()`, `miniOf()`, `applyAtelierMode()` (bascule compact/complet), `updateActions()`, `spendTwoEclats()`, handlers reroll/convert/modify/create.
 - **Marteau** : `toggleSmash()`, `smashAt()`, `awardCharges()`.
 - **Éditeur** : `openEditor(kind, piece)`, `renderEditor()`, `paintEditorCell()`, `editorCost()`, `affordable()`, `availOf()`, `usedInEditor()`, `lockedAllFilled()`, `firstAvailColor()`.
 - **Ressources** : `renderRes()`, `renderEclatCubes()`, `cubes()`.

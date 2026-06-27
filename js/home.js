@@ -1,7 +1,7 @@
 // home.js — écran d'accueil, sélection du thème/mode, démarrage.
 
 import { S, $, setStatus } from './state.js';
-import { THEME, COLS, ROWS, NM, MOTIFS, loadCatalog, loadTheme, motifCSS } from './theme.js';
+import { THEME, STORY, COLS, ROWS, NM, MOTIFS, loadCatalog, loadTheme, motifCSS } from './theme.js';
 import { buildGrid } from './grid.js';
 import { renderAtelier } from './atelier.js';
 import { renderRes } from './resources.js';
@@ -61,12 +61,16 @@ export function startGame(mode) {
   S.charges = 0; S.essence = 0;
   S.activeSlot = null; S.smash = false; S.ghostCell = null;
   S.storyIdx = 0; S.hintLevel = 0;
-  if (mode === 'histoire') S.atelier = Array.from({ length: THEME.rules.slots }, () => newPiece());
+  if (mode === 'histoire') {
+    S.atelier = Array.from({ length: THEME.rules.slots }, () => newPiece());
+    S.atelierExpanded = THEME.rules.atelierCompact !== true;
+  }
 
   $('home').classList.add('hidden'); $('game').classList.remove('hidden');
+  $('gameTitle').textContent = (STORY && STORY.name) || THEME.name || 'TESSERA';
   $('modeTag').textContent = mode === 'detente' ? 'Détente' : 'Histoire';
-  $('atelier').classList.toggle('hidden', mode !== 'histoire');
-  $('resbar').classList.toggle('hidden', mode !== 'histoire');
+  $('hud').classList.toggle('hidden', mode !== 'histoire');
+  $('actions').classList.toggle('hidden', mode !== 'histoire');
   $('paletteWrap').classList.toggle('hidden', mode !== 'detente');
 
   buildGrid(onCell);

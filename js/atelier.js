@@ -1,7 +1,7 @@
 // atelier.js — emplacements de tesselles, glisser-déposer, boutons d'action.
 
 import { S, $, setStatus } from './state.js';
-import { motifCSS } from './theme.js';
+import { motifCSS, THEME } from './theme.js';
 import { oriented, fits, newPiece } from './tesselle.js';
 import { cellEl, paintCell, pop, paintGhost, clearGhost } from './grid.js';
 import { renderRes, updateActions } from './resources.js';
@@ -11,17 +11,54 @@ import { openEditor } from './editor.js';
 
 let drag = null;
 
+const MINI_GAP = 3; // doit correspondre à .slot .mini{gap:...} dans styles.css
+
 export function renderAtelier() {
   const sl = $('slots'); sl.innerHTML = '';
-  S.atelier.forEach((p, i) => {
+  const buttons = S.atelier.map((p, i) => {
     const b = document.createElement('button');
     b.className = 'slot';
     b.setAttribute('aria-pressed', String(S.activeSlot === i));
-    b.appendChild(miniOf(p, 11));
     b.addEventListener('pointerdown', e => startDrag(e, i, b));
     sl.appendChild(b);
+    return b;
   });
+  // Taille de case calculée pour que la plus grande forme du thème (dans
+  // n'importe quelle rotation) tienne toujours dans le cadre fixe du slot —
+  // ainsi pivoter une tesselle ne fait jamais bouger les cadres voisins.
+  const px = buttons[0] ? miniPx(buttons[0]) : 30;
+  S.atelier.forEach((p, i) => buttons[i].appendChild(miniOf(p, px)));
+  applyAtelierMode();
   updateActions();
+}
+
+function maxShapeSpan() {
+  let max = 1;
+  for (const shape of THEME.shapes) {
+    const rows = Math.max(...shape.cells.map(c => c[0])) + 1;
+    const cols = Math.max(...shape.cells.map(c => c[1])) + 1;
+    max = Math.max(max, rows, cols);
+  }
+  return max;
+}
+
+function miniPx(slotEl) {
+  const span = maxShapeSpan();
+  const innerW = slotEl.clientWidth - 10;  // moins le padding du slot (5px de chaque côté)
+  const innerH = slotEl.clientHeight - 10;
+  const fit = Math.min(innerW, innerH) - (span - 1) * MINI_GAP;
+  return Math.max(10, Math.min(40, Math.floor(fit / span)));
+}
+
+// Bascule le tiroir d'actions (convertir/reroll/modifier/créer), qui glisse
+// depuis le bas de l'écran. État initial réglé par THEME.rules.atelierCompact,
+// ensuite libre au joueur via #atelierToggle.
+export function applyAtelierMode() {
+  const open = S.atelierExpanded;
+  $('actions').classList.toggle('open', open);
+  const btn = $('atelierToggle');
+  btn.setAttribute('aria-label', open ? 'Fermer les actions' : 'Ouvrir les actions');
+  btn.setAttribute('aria-pressed', String(open));
 }
 
 function miniOf(p, px) {
@@ -33,6 +70,7 @@ function miniOf(p, px) {
   const map = {}; o.cells.forEach(([r, c], k) => map[r + '_' + c] = o.motifs[k]);
   for (let r = 0; r < maxR; r++) for (let c = 0; c < maxC; c++) {
     const i = document.createElement('i'); const m = map[r + '_' + c];
+    i.style.width = px + 'px'; i.style.height = px + 'px';
     i.style.background = m == null ? 'transparent' : motifCSS(m);
     g.appendChild(i);
   }
@@ -130,7 +168,11 @@ function removePreview() { const w = $('drag-preview'); if (w) w.remove(); }
 
 /* ---------- câblage des boutons d'action ---------- */
 export function initAtelierActions() {
-  $('smashBtn').addEventListener('click', toggleSmash);
+  $('atelierToggle').addEventListener('click', () => {
+    S.atelierExpanded = !S.atelierExpanded;
+    applyAtelierMode();
+  });
+  $('resSmash').addEventListener('click', toggleSmash);
   $('convBtn').addEventListener('click', convert);
   $('rerollBtn').addEventListener('click', reroll);
   $('modBtn').addEventListener('click', () => {

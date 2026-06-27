@@ -30,7 +30,7 @@ export function awardCharges() {
 export function toggleSmash() {
   if (S.charges < 1 && !S.smash) { setStatus('Pas de charge de marteau.'); return; }
   S.smash = !S.smash;
-  document.getElementById('smashBtn').classList.toggle('smashon', S.smash);
+  document.getElementById('resSmash').classList.toggle('smashon', S.smash);
   paintGrid();
   setStatus(S.smash ? 'Touche une case à détruire 🔨' : '');
 }
@@ -43,7 +43,7 @@ export function smashAt(r, c) {
   S.charges--; S.eclats[m]++; S.grid[r][c] = null;
   paintCell(r, c); pop(r, c);
   S.smash = false;
-  document.getElementById('smashBtn').classList.remove('smashon');
+  document.getElementById('resSmash').classList.remove('smashon');
   paintGrid(); renderRes();
   setStatus(`Case brisée · +1 éclat ${MOTIF(m).name} ✦`);
 }

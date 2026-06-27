@@ -1,6 +1,6 @@
 // sw.js — service worker PWA.
 // Bump CACHE à chaque changement d'assets pour forcer la mise à jour.
-const CACHE = 'tessera-v4';
+const CACHE = 'tessera-v6';
 
 const SHELL = [
   './', './index.html', './manifest.webmanifest', './css/styles.css',

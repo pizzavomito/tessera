@@ -45,4 +45,47 @@ export function setActive(theme, story) {
   ROWS = theme.grid.rows;
   MOTIFS = theme.motifs;
   NM = theme.motifs.length;
+  applyStyle(theme.style);
+}
+
+// THEME.style.colors.<clé> → variable CSS (cf. :root dans styles.css).
+const COLOR_VARS = {
+  ink: '--ink', surface: '--surface', surface2: '--surface-2',
+  line: '--line', lineSoft: '--line-soft',
+  txt: '--txt', muted: '--muted',
+  eclat: '--eclat', marteau: '--marteau', essence: '--essence',
+  ok: '--ok', bad: '--bad',
+};
+
+let fontLinkEl = null;
+
+// Applique THEME.style (optionnel) en variables CSS racine ; tout ce qui est
+// absent retombe sur les valeurs par défaut de :root (styles.css).
+function applyStyle(style) {
+  const root = document.documentElement.style;
+  const colors = (style && style.colors) || {};
+  for (const key in COLOR_VARS) {
+    const v = colors[key];
+    if (v) root.setProperty(COLOR_VARS[key], v);
+    else root.removeProperty(COLOR_VARS[key]);
+  }
+  const font = (style && style.font) || {};
+  if (font.family) root.setProperty('--font', font.family);
+  else root.removeProperty('--font');
+  loadFontUrl(font.url || null);
+  document.body.classList.toggle('bare-frames', !!style && style.frames === false);
+}
+
+// Injecte (ou retire) une feuille de police web pointée par THEME.style.font.url.
+function loadFontUrl(url) {
+  if (!url) {
+    if (fontLinkEl) { fontLinkEl.remove(); fontLinkEl = null; }
+    return;
+  }
+  if (fontLinkEl && fontLinkEl.href === url) return;
+  if (fontLinkEl) fontLinkEl.remove();
+  fontLinkEl = document.createElement('link');
+  fontLinkEl.rel = 'stylesheet';
+  fontLinkEl.href = url;
+  document.head.appendChild(fontLinkEl);
 }

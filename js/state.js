@@ -9,6 +9,7 @@ export const S = {
   charges: 0,
   essence: 0,
   atelier: [],           // [slots] de tesselles
+  atelierExpanded: true, // atelier complet (actions visibles) vs compact (3 tesselles + bouton)
   activeSlot: null,      // emplacement actif (cible des actions)
   smash: false,          // mode marteau
   palMotif: 0,           // couleur courante en mode Détente

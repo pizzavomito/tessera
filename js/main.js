@@ -4,10 +4,12 @@ import { initHome } from './home.js';
 import { initAtelierActions } from './atelier.js';
 import { initEditor } from './editor.js';
 import { initStory } from './story.js';
+import { initEclatZoom } from './resources.js';
 
 initAtelierActions();
 initEditor();
 initStory();
+initEclatZoom();
 initHome();
 
 // PWA : service worker (nécessite HTTPS ou localhost ; GitHub Pages est en HTTPS).
